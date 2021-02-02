@@ -34,12 +34,12 @@ void EditorWidget::buildEffectContainer(AEffect *effect)
 	LONG_PTR wndPtr = (LONG_PTR)effect;
 	SetWindowLongPtr(windowHandle, -21 /*GWLP_USERDATA*/, wndPtr);
 
-	QWidget *widget = QWidget::createWindowContainer(QWindow::fromWinId((WId)windowHandle), this);
+	widget = QWidget::createWindowContainer(QWindow::fromWinId((WId)windowHandle), this);
 	widget->move(0, 0);
 	widget->resize(300, 300);
 
 	effect->dispatcher(effect, effEditOpen, 0, 0, windowHandle, 0);
-
+	
 	VstRect *vstRect = nullptr;
 	effect->dispatcher(effect, effEditGetRect, 0, 0, &vstRect, 0);
 	if (vstRect) {
@@ -47,42 +47,15 @@ void EditorWidget::buildEffectContainer(AEffect *effect)
 	}
 }
 
-void EditorWidget::handleResizeRequest(int, int)
+void EditorWidget::handleResizeRequest(int w, int h)
 {
 	// Some plugins can't resize automatically (like SPAN by Voxengo),
 	// so we must resize window manually
-
-	// get pointer to vst effect from window long
-	LONG_PTR    wndPtr   = (LONG_PTR)GetWindowLongPtrW(windowHandle, -21 /*GWLP_USERDATA*/);
-	AEffect *   effect   = (AEffect *)(wndPtr);
-	VstRect *   rec      = nullptr;
-	static RECT PluginRc = {0};
-	RECT        winRect  = {0};
-
-	GetWindowRect(windowHandle, &winRect);
-	if (effect) {
-		effect->dispatcher(effect, effEditGetRect, 1, 0, &rec, 0);
-	}
-
-	// compare window rect with VST Rect
-	if (rec) {
-		if (PluginRc.bottom != rec->bottom || PluginRc.left != rec->left || PluginRc.right != rec->right ||
-		    PluginRc.top != rec->top) {
-			PluginRc.bottom = rec->bottom;
-			PluginRc.left   = rec->left;
-			PluginRc.right  = rec->right;
-			PluginRc.top    = rec->top;
-
-			// set rect to our window
-			AdjustWindowRectEx(&PluginRc, WS_CAPTION | WS_THICKFRAME | WS_OVERLAPPEDWINDOW, FALSE, 0);
-
-			// move window to apply pos
-			MoveWindow(windowHandle,
-			           winRect.left,
-			           winRect.top,
-			           PluginRc.right - PluginRc.left,
-			           PluginRc.bottom - PluginRc.top,
-			           TRUE);
-		}
+	// P.S iZotope also can resize via this method but don't want
+	if (!strcmp(vendorString, "Voxengo") || !strcmp(vendorString, "Suirless")) {
+		widget->resize(w, h);
+		widget->update();
+		resize(w, h);
+		widget->update();
 	}
 }

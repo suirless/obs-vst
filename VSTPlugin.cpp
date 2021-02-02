@@ -163,7 +163,7 @@ void VSTPlugin::unloadEffect()
 void VSTPlugin::openEditor()
 {
 	if (effect && !editorWidget) {
-		editorWidget = new EditorWidget(nullptr, this);
+		editorWidget = new EditorWidget(nullptr, this, vendorString);
 		editorWidget->buildEffectContainer(effect);
 
 		if (sourceName.empty()) {

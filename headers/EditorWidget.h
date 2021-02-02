@@ -46,18 +46,20 @@ public:
 
 class EditorWidget : public QWidget {
 
-	VSTPlugin *plugin;
+	VSTPlugin * plugin       = NULL;
+	const char *vendorString = NULL;
 
 #ifdef __APPLE__
 	QMacCocoaViewContainer *cocoaViewContainer = NULL;
 #elif WIN32
+	QWidget *widget = NULL; 
 	HWND windowHandle = NULL;
 #elif __linux__
 
 #endif
 
 public:
-	EditorWidget(QWidget *parent, VSTPlugin *plugin);
+	EditorWidget(QWidget *parent, VSTPlugin *plugin, char *vendorString);
 	void buildEffectContainer(AEffect *effect);
 	void closeEvent(QCloseEvent *event) override;
 	void handleResizeRequest(int width, int height);
